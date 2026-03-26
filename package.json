@@ -4,10 +4,13 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "api:dev": "cd apps/api && pnpm run dev",
+    "web:dev": "cd apps/web/clientWeb && pnpm run dev",
+    "admin:dev": "cd apps/web/admin && pnpm run dev"
   },
   "devDependencies": {
-    "eslint": "^8.57.0",
+    "eslint": "^10.1.0",
     "prettier": "^3.2.5",
     "turbo": "^2.8.20"
   },

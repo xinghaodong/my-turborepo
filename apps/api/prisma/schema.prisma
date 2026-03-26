@@ -1,0 +1,166 @@
+// Prisma Schema - 实时协作房间 (Collaborative Room)
+// 数据库: PostgreSQL
+// 这个类似 typeOrm 的 @Entity 实体类
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== 用户系统 ====================
+
+enum SystemRole {
+  SUPER_ADMIN
+  ADMIN
+  USER
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  email     String   @unique
+  password  String   // bcrypt 哈希
+  avatar    String?  // 用户在线时显示的头像
+  role      SystemRole @default(USER)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关系
+  rooms         RoomMember[]   // 参与的房间
+  ownedRooms    Room[]         // 创建的房间
+  comments      Comment[]      // 发表的评论
+  assignedCards CardAssignee[] // 被分配的任务卡片
+  activities    Activity[]     // 操作日志
+
+  @@map("users")
+}
+
+// ==================== 房间系统 (核心) ====================
+
+enum RoomRole {
+  OWNER  // 房间创建者
+  ADMIN  // 房间管理员
+  MEMBER // 协作者
+  GUEST  // 访客
+}
+
+model Room {
+  id          String   @id @default(uuid())
+  title       String   // 房间名
+  description String?  // 房间简介
+  background  String?  @default("#1a1a2e")
+  
+  // 房间发现与安全
+  isPublic    Boolean  @default(true)  // 是否公开，公开房间可被搜索
+  password    String?  // 私密房间的可选进入密码
+  inviteCode  String   @unique         // 房间唯一邀请码 (如: ABC-123)
+  tags        String[] @default([])    // 房间标签列表 (如: ["开发", "设计"])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 创建者
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id])
+
+  // 内容与成员
+  members    RoomMember[]
+  columns    Column[]     // 房间内的列（分类栏）
+  activities Activity[]
+
+  @@map("rooms")
+}
+
+model RoomMember {
+  id     String   @id @default(uuid())
+  role   RoomRole @default(MEMBER)
+  joinedAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roomId String
+  room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roomId])
+  @@map("room_members")
+}
+
+// ==================== 房间内容 (看板结构) ====================
+
+/// 房间里的分类栏 (Lane/Column)
+model Column {
+  id       String @id @default(uuid())
+  title    String
+  position Int    // 排序位置
+
+  roomId String
+  room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  cards Card[]
+
+  @@map("columns")
+}
+
+/// 分类栏里的具体卡片 (Card/Item)
+model Card {
+  id          String   @id @default(uuid())
+  title       String
+  description String?  @db.Text
+  position    Int      // 在列中的排序
+  dueDate     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  columnId String
+  column   Column @relation(fields: [columnId], references: [id], onDelete: Cascade)
+
+  assignees CardAssignee[]
+  comments  Comment[]
+  activities Activity[]
+
+  @@map("cards")
+}
+
+model CardAssignee {
+  cardId String
+  card   Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([cardId, userId])
+  @@map("card_assignees")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  cardId String
+  card   Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("comments")
+}
+
+model Activity {
+  id        String   @id @default(uuid())
+  action    String   // 如: card_moved, user_joined
+  details   String?  @db.Text
+  createdAt DateTime @default(now())
+
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roomId  String
+  room    Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  cardId  String?
+  card    Card?  @relation(fields: [cardId], references: [id], onDelete: SetNull)
+
+  @@map("activities")
+}
