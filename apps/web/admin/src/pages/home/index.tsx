@@ -9,11 +9,12 @@ import {
 import { Button, message, Space } from 'antd';
 
 import { User } from '@repo/types/user';
-import { getUserList } from '@/api/user.js';
+import { getUserList, getTestApi } from '@/api/user.js';
 import { registerApi } from '@/api/auth.js';
 
 const Home = () => {
   const [userList, setUserList] = useState<User[]>([]);
+  const [test, setText] = useState<any>(null);
   const getData = async () => {
     try {
       // 获取用户列表（通过封装的 API）
@@ -23,8 +24,18 @@ const Home = () => {
       console.error('请求失败了', error);
     }
   };
+  const getTest = async () => {
+    try {
+      const res = await getTestApi();
+      console.log(res, '3333333');
+      setText(res)
+    } catch (error: any) {
+      console.error('请求失败了....', error);
+    }
+  };
   useEffect(() => {
     getData();
+    getTest();
   }, []);
 
   const register = async () => {
@@ -67,6 +78,7 @@ const Home = () => {
           })
         }
       </div>
+      {test}
     </div>
   );
 };

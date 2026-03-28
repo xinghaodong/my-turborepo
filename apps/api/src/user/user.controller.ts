@@ -21,7 +21,7 @@ export class UserController {
   @Public()
   @Get('test')
   test() {
-    return 'test';
+    return '我是test 接口';
   }
 
   /** GET /users - 获取所有用户（仅管理员） */

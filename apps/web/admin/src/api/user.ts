@@ -8,3 +8,7 @@ export const getUserList = (params?: { page?: number; limit?: number }) => {
     params,
   }) as any;
 };
+
+export const getTestApi = () => {
+  return request.get('/users/test') as any;
+};
