@@ -12,10 +12,10 @@ export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const requiredRoles = this.reflector.getAllAndOverride<string[]>(
+      ROLES_KEY,
+      [context.getHandler(), context.getClass()],
+    );
 
     if (!requiredRoles) {
       return true;
@@ -25,10 +25,13 @@ export class RolesGuard implements CanActivate {
     if (!user) {
       throw new ForbiddenException('未认证');
     }
+    console.log(user, 'user');
 
     const hasRole = requiredRoles.some((role) => user.role === role);
     if (!hasRole) {
-      throw new ForbiddenException('权限不足，需要角色: ' + requiredRoles.join(', '));
+      throw new ForbiddenException(
+        '权限不足，需要角色: ' + requiredRoles.join(', '),
+      );
     }
 
     return true;

@@ -28,7 +28,7 @@ const Home = () => {
     try {
       const res = await getTestApi();
       console.log(res, '3333333');
-      setText(res)
+      setText(res);
     } catch (error: any) {
       console.error('请求失败了....', error);
     }
@@ -46,10 +46,11 @@ const Home = () => {
         password: '123456',
       });
 
-      const { accessToken, refreshToken } = res;
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
-      message.success('注册并保存 Token 成功');
+      // const { accessToken, refreshToken } = res;
+      // localStorage.setItem('accessToken', accessToken);
+      // localStorage.setItem('refreshToken', refreshToken);
+      console.log(res, 'res');
+      message.success('注册成功');
       getData();
     } catch (error: any) {
       // 拦截器已统一处理异常提示
@@ -57,7 +58,7 @@ const Home = () => {
   };
   return (
     <div>
-      <h1>home</h1>
+      <div>home</div>
       <Space>
         <HomeOutlined />
         <SettingFilled />

@@ -26,8 +26,7 @@ export class UserController {
 
   /** GET /users - 获取所有用户（仅管理员） */
   @Get()
-  // @Roles('ADMIN', 'SUPER_ADMIN')
-  @Public()
+  @Roles('ADMIN', 'SUPER_ADMIN')
   findAll(@Query('page') page: string, @Query('limit') limit: string) {
     return this.userService.findAll(parseInt(page) || 1, parseInt(limit) || 20);
   }

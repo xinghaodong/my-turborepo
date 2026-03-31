@@ -5,7 +5,8 @@
     ".": "./src/index.ts",
     "./api": "./src/api.ts",
     "./user": "./src/user.ts",
-    "./card": "./src/card.ts"
+    "./card": "./src/card.ts",
+    "./room": "./src/room.ts"
   },
   "license": "MIT",
   "scripts": {

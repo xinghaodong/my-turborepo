@@ -4,6 +4,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RegisterDto, LoginDto } from './dto/auth.dto.js';
@@ -13,6 +14,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
   /** 用户注册 */
@@ -95,7 +97,11 @@ export class AuthService {
   /** 刷新 Token */
   async refreshTokens(refreshToken: string) {
     try {
-      const payload = this.jwtService.verify(refreshToken);
+      const payload = this.jwtService.verify(refreshToken, {
+        secret:
+          this.configService.get<string>('JWT_REFRESH_SECRET') ||
+          'default-refresh-secret',
+      });
       const user = await this.prisma.user.findUnique({
         where: { id: payload.sub },
       });
@@ -155,10 +161,18 @@ export class AuthService {
     const payload = { sub: userId, email, role };
     return {
       accessToken: this.jwtService.sign(payload, {
-        expiresIn: '2h', // 短效 Access Token
+        secret:
+          this.configService.get<string>('JWT_ACCESS_SECRET') ||
+          'default-access-secret',
+        expiresIn: (this.configService.get<string>('JWT_ACCESS_EXPIRES_IN') ||
+          '2h') as any,
       }),
       refreshToken: this.jwtService.sign(payload, {
-        expiresIn: '7d', // 长效 Refresh Token
+        secret:
+          this.configService.get<string>('JWT_REFRESH_SECRET') ||
+          'default-refresh-secret',
+        expiresIn: (this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') ||
+          '7d') as any,
       }),
     };
   }

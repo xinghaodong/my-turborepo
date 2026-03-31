@@ -43,11 +43,61 @@ export class RoomService {
       },
       include: {
         columns: { orderBy: { position: 'asc' } },
-        members: { include: { user: { select: { id: true, username: true, avatar: true } } } },
+        members: {
+          include: {
+            user: { select: { id: true, username: true, avatar: true } },
+          },
+        },
       },
     });
 
     return room;
+  }
+
+  /** 获取所有房间 分页 */
+  async findAll(page: number, limit: number) {
+    const skip = (page - 1) * limit;
+    // const [rooms, total] = await this.prisma.room.findMany({
+    //   skip,
+    //   take: limit,
+    //   include: {
+    //     columns: { orderBy: { position: 'asc' } },
+    //     members: {
+    //       include: {
+    //         user: { select: { id: true, username: true, avatar: true } },
+    //       },
+    //     },
+    //   },
+    // });
+    // return {
+    //   list: rooms,
+    //   total,
+    //   page,
+    //   totalPages: Math.ceil(total / limit),
+    // };
+
+    const [users, total] = await Promise.all([
+      this.prisma.room.findMany({
+        include: {
+          columns: { orderBy: { position: 'asc' } },
+          members: {
+            include: {
+              user: { select: { id: true, username: true, avatar: true } },
+            },
+          },
+        },
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.room.count(),
+    ]);
+    return {
+      list: users,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   /** 获取公开房间列表 (搜索/标签) */
@@ -64,6 +114,8 @@ export class RoomService {
         id: true,
         title: true,
         description: true,
+        isPublic: true,
+        inviteCode: true,
         background: true,
         tags: true,
         createdAt: true,
@@ -110,7 +162,13 @@ export class RoomService {
             cards: {
               orderBy: { position: 'asc' },
               include: {
-                assignees: { include: { user: { select: { id: true, username: true, avatar: true } } } },
+                assignees: {
+                  include: {
+                    user: {
+                      select: { id: true, username: true, avatar: true },
+                    },
+                  },
+                },
               },
             },
           },
@@ -133,10 +191,10 @@ export class RoomService {
       throw new ForbiddenException('该房间为私密，你需要获得邀请才能加入');
     }
 
-    return { 
-      ...room, 
+    return {
+      ...room,
       myRole: member?.role || 'GUEST',
-      isMember: !!member
+      isMember: !!member,
     };
   }
 
@@ -196,7 +254,11 @@ export class RoomService {
   }
 
   /** 权限验证辅助器 */
-  private async checkPermission(roomId: string, userId: string, roles: string[]) {
+  private async checkPermission(
+    roomId: string,
+    userId: string,
+    roles: string[],
+  ) {
     const member = await this.prisma.roomMember.findUnique({
       where: { userId_roomId: { userId, roomId } },
     });

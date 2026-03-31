@@ -10,6 +10,7 @@ import { ColumnModule } from './column/column.module.js';
 import { CardModule } from './card/card.module.js';
 import { UserModule } from './user/user.module.js';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard.js';
+import { RolesGuard } from './auth/guards/roles.guard.js';
 
 @Module({
   imports: [
@@ -31,6 +32,10 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard.js';
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
   ],
 })

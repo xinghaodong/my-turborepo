@@ -16,6 +16,12 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 export class RoomController {
   constructor(private readonly roomService: RoomService) {}
 
+  // 获取所有的房间 分页
+  @Get()
+  findAll(@Query('page') page: string, @Query('limit') limit: string) {
+    return this.roomService.findAll(parseInt(page) || 1, parseInt(limit) || 20);
+  }
+
   /** POST /rooms - 创建新房间 */
   @Post()
   create(@CurrentUser('id') userId: string, @Body() dto: CreateRoomDto) {

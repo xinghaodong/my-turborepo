@@ -14,5 +14,5 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
 }
-
+// 排除 role 和 isActive 字段
 export interface UserProfile extends Omit<User, 'role' | 'isActive'> {}
