@@ -40,3 +40,17 @@ export const joinRoom = (data: { inviteCode: string; password?: string }) => {
 export const getRooms = (params?: { page?: number; limit?: number }) => {
   return request.get('/rooms', { params });
 };
+
+/**
+ * 删除房间
+ */
+export const deleteRoom = (id: string) => {
+  return request.delete(`/rooms/${id}`);
+};
+
+/**
+ * 更新房间状态
+ */
+export const updateRoomStatus = (id: string, status: string) => {
+  return request.put(`/rooms/${id}/status`, { status });
+};

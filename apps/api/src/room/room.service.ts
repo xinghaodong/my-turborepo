@@ -40,6 +40,9 @@ export class RoomService {
             { title: '完成', position: 2 },
           ],
         },
+        document: {
+          create: {},
+        },
       },
       include: {
         columns: { orderBy: { position: 'asc' } },
@@ -57,25 +60,6 @@ export class RoomService {
   /** 获取所有房间 分页 */
   async findAll(page: number, limit: number) {
     const skip = (page - 1) * limit;
-    // const [rooms, total] = await this.prisma.room.findMany({
-    //   skip,
-    //   take: limit,
-    //   include: {
-    //     columns: { orderBy: { position: 'asc' } },
-    //     members: {
-    //       include: {
-    //         user: { select: { id: true, username: true, avatar: true } },
-    //       },
-    //     },
-    //   },
-    // });
-    // return {
-    //   list: rooms,
-    //   total,
-    //   page,
-    //   totalPages: Math.ceil(total / limit),
-    // };
-
     const [users, total] = await Promise.all([
       this.prisma.room.findMany({
         include: {
@@ -239,7 +223,23 @@ export class RoomService {
 
     return this.prisma.room.update({
       where: { id: roomId },
-      data: dto,
+      data: dto as any, // Cast to any or appropriate type because of RoomStatus enum mismatch with string occasionally
+    });
+  }
+
+  /** 删除房间 (仅限所有者或系统管理员) */
+  async remove(roomId: string, userId: string) {
+    await this.checkPermission(roomId, userId, ['OWNER', 'ADMIN']);
+    return this.prisma.room.delete({
+      where: { id: roomId },
+    });
+  }
+
+  /** 更新房间状态 (用于后台封禁等) */
+  async updateStatus(roomId: string, status: any) {
+    return this.prisma.room.update({
+      where: { id: roomId },
+      data: { status },
     });
   }
 

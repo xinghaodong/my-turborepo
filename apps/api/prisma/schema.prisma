@@ -49,6 +49,12 @@ enum RoomRole {
   GUEST  // 访客
 }
 
+enum RoomStatus {
+  ACTIVE
+  BANNED
+  CLOSED
+}
+
 model Room {
   id          String   @id @default(uuid())
   title       String   // 房间名
@@ -61,6 +67,9 @@ model Room {
   inviteCode  String   @unique         // 房间唯一邀请码 (如: ABC-123)
   tags        String[] @default([])    // 房间标签列表 (如: ["开发", "设计"])
 
+  status      RoomStatus @default(ACTIVE)
+  maxMembers  Int        @default(50)
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -72,6 +81,7 @@ model Room {
   members    RoomMember[]
   columns    Column[]     // 房间内的列（分类栏）
   activities Activity[]
+  document   Document?
 
   @@map("rooms")
 }
@@ -163,4 +173,21 @@ model Activity {
   card    Card?  @relation(fields: [cardId], references: [id], onDelete: SetNull)
 
   @@map("activities")
+}
+
+// ==================== 协同文档 (Yjs) ====================
+
+model Document {
+  id        String   @id @default(uuid())
+  roomId    String   @unique
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  
+  // Yjs 文档二进制存储
+  content   Bytes?   // 存储 Y.encodeStateAsUpdate(ydoc)
+  state     Bytes?   // 可选: 存储增量 state vector
+  
+  version   Int      @default(1)
+  updatedAt DateTime @updatedAt
+
+  @@map("documents")
 }

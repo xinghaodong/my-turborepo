@@ -52,6 +52,13 @@ export class UpdateRoomDto {
   @IsString({ each: true })
   @IsOptional()
   tags?: string[];
+
+  @IsString()
+  @IsOptional()
+  status?: string;
+
+  @IsOptional()
+  maxMembers?: number;
 }
 
 export class JoinRoomDto {

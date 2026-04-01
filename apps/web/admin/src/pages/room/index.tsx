@@ -19,7 +19,7 @@ import {
   LockOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import { createRoom, getRooms } from '@/api/room';
+import { createRoom, getRooms, deleteRoom, updateRoomStatus, updateRoom } from '@/api/room';
 import { Room } from '@repo/types/room';
 
 // interface Room {
@@ -39,6 +39,7 @@ export default function RoomManagement() {
   const [data, setData] = useState<Room[]>([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingRoom, setEditingRoom] = useState<Room | null>(null);
   const [form] = Form.useForm();
   const [pagination, setPagination] = useState({
     current: 1,
@@ -75,15 +76,35 @@ export default function RoomManagement() {
     fetchRooms(pag.current, pag.pageSize);
   };
 
-  const handleCreate = async (values: any) => {
+  const openEditModal = (record: Room) => {
+    setEditingRoom(record);
+    form.setFieldsValue({
+      title: record.title,
+      description: record.description,
+      isPublic: record.isPublic,
+      tags: record.tags && record.tags.length > 0 ? record.tags.join(',') : '',
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleCreateOrUpdate = async (values: any) => {
     try {
       setLoading(true);
-      await createRoom({
+      const submitData = {
         ...values,
         tags: values.tags ? values.tags.split(',') : [],
-      });
-      message.success('房间创建成功');
+      };
+
+      if (editingRoom) {
+        await updateRoom(editingRoom.id, submitData);
+        message.success('房间更新成功');
+      } else {
+        await createRoom(submitData);
+        message.success('房间创建成功');
+      }
+
       setIsModalOpen(false);
+      setEditingRoom(null);
       form.resetFields();
       fetchRooms();
     } catch (error) {
@@ -91,6 +112,34 @@ export default function RoomManagement() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleStatusChange = async (id: string, isChecked: boolean) => {
+    try {
+      const newStatus = isChecked ? 'ACTIVE' : 'BANNED';
+      await updateRoomStatus(id, newStatus);
+      message.success(isChecked ? '房间已解封' : '房间已封禁');
+      fetchRooms();
+    } catch (error) {
+    }
+  };
+
+  const handleDelete = (id: string) => {
+    Modal.confirm({
+      title: '确认删除房间?',
+      content: '删除后，关于该房间的所有文档与数据均无法恢复。',
+      okText: '确认删除',
+      okType: 'danger',
+      cancelText: '取消',
+      onOk: async () => {
+        try {
+          await deleteRoom(id);
+          message.success('房间已彻底删除');
+          fetchRooms();
+        } catch (error) {
+        }
+      },
+    });
   };
 
   const columns: ColumnsType<Room> = [
@@ -133,6 +182,19 @@ export default function RoomManagement() {
         ),
     },
     {
+      title: '状态监管',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status, record) => (
+        <Switch
+          checkedChildren="正常"
+          unCheckedChildren="封禁"
+          checked={status !== 'BANNED'}
+          onChange={(checked) => handleStatusChange(record.id, checked)}
+        />
+      ),
+    },
+    {
       title: '标签',
       dataIndex: 'tags',
       key: 'tags',
@@ -153,12 +215,12 @@ export default function RoomManagement() {
     {
       title: '操作',
       key: 'action',
-      render: () => (
+      render: (_, record) => (
         <Space size="middle">
           <Button
             type="link"
             size="small"
-            onClick={() => message.info('管理功能开发中...')}
+            onClick={() => openEditModal(record)}
           >
             编辑
           </Button>
@@ -166,7 +228,7 @@ export default function RoomManagement() {
             type="link"
             danger
             size="small"
-            onClick={() => message.info('删除功能开发中...')}
+            onClick={() => handleDelete(record.id)}
           >
             删除
           </Button>
@@ -204,7 +266,11 @@ export default function RoomManagement() {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              setEditingRoom(null);
+              form.resetFields();
+              setIsModalOpen(true);
+            }}
           >
             创建房间
           </Button>
@@ -238,13 +304,17 @@ export default function RoomManagement() {
       </Card>
 
       <Modal
-        title="创建新房间"
+        title={editingRoom ? "编辑房间信息" : "创建新房间"}
         open={isModalOpen}
         onOk={() => form.submit()}
-        onCancel={() => setIsModalOpen(false)}
+        onCancel={() => {
+          setIsModalOpen(false);
+          setEditingRoom(null);
+          form.resetFields();
+        }}
         confirmLoading={loading}
       >
-        <Form form={form} layout="vertical" onFinish={handleCreate}>
+        <Form form={form} layout="vertical" onFinish={handleCreateOrUpdate}>
           <Form.Item
             name="title"
             label="房间名称"
