@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import CollaborativeEditor from '@/components/Editor';
 
 // 获取一个随机颜色用于光标显示
@@ -17,7 +17,9 @@ const getRandomColor = () => {
 
 export default function RoomPage() {
   const { id } = useParams<{ id: string }>();
-
+  const [searchParams] = useSearchParams();
+  const title = searchParams.get('title') || '未命名房间';
+  console.log(title, 'title')
   // 从 localStorage 获取真实登录用户的信息
   const userInfoStr = localStorage.getItem('khuserInfo');
   const userInfo = userInfoStr ? JSON.parse(userInfoStr) : null;
@@ -30,9 +32,9 @@ export default function RoomPage() {
 
   return (
     <div style={{ padding: '24px', maxWidth: '1000px', margin: '0 auto' }}>
-      <h1>协同编辑体验区 (测试版)</h1>
+      <h1>{title}</h1>
       <p style={{ color: '#888' }}>
-        提示: 当前为游客身份。你正在编辑房间: <strong>{id}</strong>
+        提示: {currentUser.username}。你正在编辑房间: <strong>{title}</strong>
         。可开启多个浏览器窗口测试。
       </p>
 

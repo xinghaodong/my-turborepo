@@ -37,7 +37,7 @@ const Login = () => {
         </div>
         <form className="login-form" onSubmit={handleLogin}>
           <div className="form-item">
-            <label>用户名</label>
+            <label>邮箱</label>
             <input
               type="text"
               placeholder="请输入您的邮箱"

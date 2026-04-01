@@ -6,6 +6,7 @@ import {
 } from '@nestjs/websockets';
 import { WebSocketServer as WS_Server } from 'ws';
 import { RoomService } from './room.service.js';
+import { RoomPresenceService } from './room-presence.service.js';
 import { JwtService } from '@nestjs/jwt';
 
 import { setupWSConnection } from 'y-websocket/bin/utils';
@@ -19,6 +20,7 @@ export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(
     private readonly roomService: RoomService,
+    private readonly presenceService: RoomPresenceService,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -50,6 +52,9 @@ export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     console.log(`[Yjs] 用户 [${user.username}] 进入房间: ${docName}`);
 
+    // 记录在线状态
+    this.presenceService.joinRoom(docName, connection);
+
     setupWSConnection(connection, request, {
       docName: docName,
       gc: true,
@@ -59,5 +64,7 @@ export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleDisconnect(connection: any) {
     const username = connection.user?.username || '未知用户';
     console.log(`[Yjs] 用户 [${username}] 已离开`);
+    // 移除在线状态
+    this.presenceService.leaveRoom(connection);
   }
 }

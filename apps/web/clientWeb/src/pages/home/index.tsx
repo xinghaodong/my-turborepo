@@ -15,6 +15,13 @@ const Home = () => {
     if (info) setUserInfo(JSON.parse(info));
 
     fetchData();
+
+    // 每 10 秒刷新一次在线人数
+    const timer = setInterval(() => {
+      fetchData();
+    }, 10000);
+
+    return () => clearInterval(timer);
   }, []);
 
   const fetchData = async () => {
@@ -28,11 +35,16 @@ const Home = () => {
     }
   };
 
+  const goToRoom = (roomId: string, title: string) => {
+    navigate(`/room/${roomId}?title=${encodeURIComponent(title)}`);
+  };
+
   const handleJoin = async () => {
     if (!inviteCode) return;
     try {
       const res: any = await joinRoom({ inviteCode });
-      navigate(`/room/${res.roomId}`);
+      // 假设 res 包含 title，如果没有，我们可能需要特殊处理
+      goToRoom(res.roomId, res.title || '新加入的房间');
     } catch (err: any) {
       alert(err?.message || '加入房间失败');
     }
@@ -90,7 +102,7 @@ const Home = () => {
                 <div
                   key={room.id}
                   className="room-card"
-                  onClick={() => navigate(`/room/${room.id}`)}
+                  onClick={() => goToRoom(room.id, room.title)}
                 >
                   <div className="room-card-header">
                     <h3>{room.title}</h3>
@@ -103,6 +115,10 @@ const Home = () => {
                   <p>{room.description || '暂无描述'}</p>
                   <div className="room-card-footer">
                     <span>👥 {room._count?.members || 0} 人已加入</span>
+                    <span className="online-indicator">
+                      <i className="online-dot" />
+                      {room.onlineCount || 0} 人在线
+                    </span>
                   </div>
                 </div>
               ))
@@ -124,7 +140,7 @@ const Home = () => {
               <div
                 key={room.id}
                 className="room-card room-card-public"
-                onClick={() => navigate(`/room/${room.id}`)}
+                onClick={() => goToRoom(room.id, room.title)}
               >
                 <div className="room-card-header">
                   <h3>{room.title}</h3>
@@ -139,13 +155,19 @@ const Home = () => {
                 <p>{room.description || '发现值得协作的乐趣'}</p>
                 <div className="room-card-footer">
                   <span>🆔 {room.inviteCode}</span>
+                  {room.onlineCount > 0 && (
+                    <span className="online-indicator">
+                      <i className="online-dot" />
+                      {room.onlineCount} 人在线
+                    </span>
+                  )}
                 </div>
               </div>
             ))}
           </div>
         </section>
       </main>
-    </div>
+    </div >
   );
 };
 

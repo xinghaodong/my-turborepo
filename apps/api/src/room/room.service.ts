@@ -5,11 +5,15 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { RoomPresenceService } from './room-presence.service.js';
 import { CreateRoomDto, UpdateRoomDto, JoinRoomDto } from './dto/room.dto.js';
 
 @Injectable()
 export class RoomService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private presenceService: RoomPresenceService,
+  ) {}
 
   /** 创建房间 */
   async create(userId: string, dto: CreateRoomDto) {
@@ -54,13 +58,16 @@ export class RoomService {
       },
     });
 
-    return room;
+    return {
+      ...room,
+      onlineCount: this.presenceService.getOnlineCount(room.id),
+    };
   }
 
   /** 获取所有房间 分页 */
   async findAll(page: number, limit: number) {
     const skip = (page - 1) * limit;
-    const [users, total] = await Promise.all([
+    const [rooms, total] = await Promise.all([
       this.prisma.room.findMany({
         include: {
           columns: { orderBy: { position: 'asc' } },
@@ -77,7 +84,10 @@ export class RoomService {
       this.prisma.room.count(),
     ]);
     return {
-      list: users,
+      list: rooms.map((room) => ({
+        ...room,
+        onlineCount: this.presenceService.getOnlineCount(room.id),
+      })),
       total,
       page,
       totalPages: Math.ceil(total / limit),
@@ -86,7 +96,7 @@ export class RoomService {
 
   /** 获取公开房间列表 (搜索/标签) */
   async findPublicRooms(search?: string, tag?: string) {
-    return this.prisma.room.findMany({
+    const rooms = await this.prisma.room.findMany({
       where: {
         isPublic: true,
         AND: [
@@ -108,6 +118,11 @@ export class RoomService {
       },
       orderBy: { createdAt: 'desc' },
     });
+
+    return rooms.map((room) => ({
+      ...room,
+      onlineCount: this.presenceService.getOnlineCount(room.id),
+    }));
   }
 
   /** 获取用户已加入的房间 */
@@ -132,6 +147,7 @@ export class RoomService {
       ...room,
       myRole: room.members[0]?.role,
       members: undefined,
+      onlineCount: this.presenceService.getOnlineCount(room.id),
     }));
   }
 
@@ -179,6 +195,7 @@ export class RoomService {
       ...room,
       myRole: member?.role || 'GUEST',
       isMember: !!member,
+      onlineCount: this.presenceService.getOnlineCount(room.id),
     };
   }
 
@@ -203,7 +220,7 @@ export class RoomService {
     });
 
     if (existingMember) {
-      return { msg: '你已在该房间中', roomId: room.id };
+      return { msg: '你已在该房间中', roomId: room.id, title: room.title };
     }
 
     await this.prisma.roomMember.create({
@@ -214,7 +231,7 @@ export class RoomService {
       },
     });
 
-    return { msg: '成功加入房间', roomId: room.id };
+    return { msg: '成功加入房间', roomId: room.id, title: room.title };
   }
 
   /** 更新房间设置 */
