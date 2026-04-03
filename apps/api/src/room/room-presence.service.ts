@@ -35,4 +35,19 @@ export class RoomPresenceService {
   getOnlineCount(roomId: string): number {
     return this.roomConnections.get(roomId)?.size || 0;
   }
+
+  /** 向房间内所有在线用户广播消息 */
+  broadcastToRoom(roomId: string, data: any) {
+    const connections = this.roomConnections.get(roomId);
+    if (connections) {
+      const message = JSON.stringify(data);
+      connections.forEach((conn) => {
+        // 使用 ws 库的原生 send 方法
+        if (conn.readyState === 1) {
+          // 确认连接处于 OPEN 状态
+          conn.send(message);
+        }
+      });
+    }
+  }
 }

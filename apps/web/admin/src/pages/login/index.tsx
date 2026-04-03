@@ -19,11 +19,11 @@ export default function Login() {
         password: values.password,
       });
       message.success('登录成功');
-      
+
       // 存储 Tokens
       localStorage.setItem('accessToken', res.accessToken);
       localStorage.setItem('refreshToken', res.refreshToken);
-      // 可选：存储用户信息
+      // 存储用户信息
       localStorage.setItem('user', JSON.stringify(res.user));
 
       navigate('/');
@@ -42,12 +42,7 @@ export default function Login() {
           <Text type="secondary">Tiptap 协同系统管理平台</Text>
         </div>
 
-        <Form
-          name="login"
-          onFinish={onFinish}
-          layout="vertical"
-          size="large"
-        >
+        <Form name="login" onFinish={onFinish} layout="vertical" size="large">
           <Form.Item
             name="email"
             rules={[

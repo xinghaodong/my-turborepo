@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength, IsOptional } from 'class-validator';
 
 export class RegisterDto {
   @IsString()
@@ -14,6 +14,14 @@ export class RegisterDto {
   @IsNotEmpty({ message: '密码不能为空' })
   @MinLength(6, { message: '密码至少6个字符' })
   password!: string;
+
+  @IsString()
+  @IsOptional()
+  role?: string; // 用户传过来的期望角色
+
+  @IsString()
+  @IsOptional()
+  adminSecret?: string; // 管理员注册密钥
 }
 
 export class LoginDto {

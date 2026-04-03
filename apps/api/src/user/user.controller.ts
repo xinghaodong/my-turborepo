@@ -6,6 +6,7 @@ import {
   Body,
   Query,
   UseGuards,
+  Delete,
 } from '@nestjs/common';
 import { UserService } from './user.service.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
@@ -43,5 +44,11 @@ export class UserController {
   @Roles('ADMIN', 'SUPER_ADMIN')
   toggleActive(@Param('id') id: string, @CurrentUser('id') operatorId: string) {
     return this.userService.toggleActive(id, operatorId);
+  }
+
+  @Delete(':id')
+  @Roles('SUPER_ADMIN')
+  deleteUser(@Param('id') id: string) {
+    return this.userService.deleteUser(id);
   }
 }

@@ -6,11 +6,11 @@ import Register from '@/pages/register';
 
 // 鉴权高阶组件，如果没登录重定向到登录页
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const token = localStorage.getItem('khaccessToken');
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
-  return <>{children}</>;
+    const token = localStorage.getItem('khaccessToken');
+    if (!token) {
+        return <Navigate to="/login" replace />;
+    }
+    return <>{children}</>;
 };
 
 /**
@@ -18,30 +18,30 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
  * 这里定义了应用的路由结构。
  */
 const router = createBrowserRouter([
-  {
-    path: '/',
-    element: (
-      <ProtectedRoute>
-        <Home />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/room/:id',
-    element: (
-      <ProtectedRoute>
-        <RoomPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/login',
-    element: <Login />,
-  },
-  {
-    path: '/register',
-    element: <Register />,
-  },
+    {
+        path: '/',
+        element: (
+            <ProtectedRoute>
+                <Home />
+            </ProtectedRoute>
+        ),
+    },
+    {
+        path: '/room/:id',
+        element: (
+            <ProtectedRoute>
+                <RoomPage />
+            </ProtectedRoute>
+        ),
+    },
+    {
+        path: '/login',
+        element: <Login />,
+    },
+    {
+        path: '/register',
+        element: <Register />,
+    },
 ]);
 
 export default router;

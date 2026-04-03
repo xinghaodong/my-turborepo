@@ -11,7 +11,12 @@ import {
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { User, UserRole } from '@repo/types/user';
-import { getUserList, updateUserRole, toggleUserActive } from '@/api/user';
+import {
+  getUserList,
+  updateUserRole,
+  toggleUserActive,
+  deleteUser,
+} from '@/api/user';
 
 export default function UserManagement() {
   const [data, setData] = useState<User[]>([]);
@@ -87,6 +92,25 @@ export default function UserManagement() {
     });
   };
 
+  const handleDelete = async (id: string) => {
+    Modal.confirm({
+      title: '删除用户',
+      content: '确定要删除该用户吗？',
+      onOk: async () => {
+        try {
+          await deleteUser(id);
+          message.success('删除成功');
+          fetchUsers(pagination.current, pagination.pageSize);
+        } catch (e) {
+          console.warn(e);
+        }
+      },
+      onCancel() {
+        // fetchUsers(pagination.current, pagination.pageSize);
+      },
+    });
+  };
+
   const roleColors: Record<string, string> = {
     [UserRole.USER]: 'default',
     [UserRole.ADMIN]: 'blue',
@@ -150,6 +174,23 @@ export default function UserManagement() {
       dataIndex: 'createdAt',
       key: 'createdAt',
       render: (date: string) => new Date(date).toLocaleString(),
+    },
+    {
+      // 操作列
+      title: '操作',
+      key: 'action',
+      render: (_, record) => (
+        <Space>
+          <Button
+            type="primary"
+            size="small"
+            danger
+            onClick={() => handleDelete(record.id)}
+          >
+            删除
+          </Button>
+        </Space>
+      ),
     },
   ];
 

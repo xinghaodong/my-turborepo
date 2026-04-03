@@ -89,4 +89,26 @@ export class UserService {
       data: { role: role as any },
     });
   }
+
+  /** 删除用户 管理员用 */
+  async deleteUser(id: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+    });
+    if (!user) throw new NotFoundException('用户不存在');
+    // 是否为超管
+    if (user.role === 'SUPER_ADMIN') {
+      throw new ForbiddenException('不能删除超级管理员');
+    }
+    // 再查询用户是否有创建房间
+    const rooms = await this.prisma.room.findMany({
+      where: { ownerId: id },
+    });
+    if (rooms.length > 0) {
+      throw new ForbiddenException('该用户创建了房间，不能删除');
+    }
+    return this.prisma.user.delete({
+      where: { id },
+    });
+  }
 }

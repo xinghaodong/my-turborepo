@@ -210,6 +210,26 @@
   color: #1e40af;
 }
 
+.ProseMirror img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.5rem auto;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.ProseMirror img.ProseMirror-selectednode {
+  outline: 3px solid #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+}
+
+.editor-image {
+  border: 1px solid #f0f0f0;
+}
+
 .ProseMirror pre {
   background-color: #1e293b;
   color: #f8fafc;
@@ -242,4 +262,62 @@
   top: -1.8em;
   user-select: none;
   white-space: nowrap;
+}
+
+/* Table Styles */
+.ProseMirror table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 2rem 0;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.ProseMirror th,
+.ProseMirror td {
+  min-width: 1em;
+  border: 1px solid #e5e7eb;
+  padding: 10px 12px;
+  vertical-align: top;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.ProseMirror th {
+  font-weight: bold;
+  text-align: left;
+  background-color: #f9fafb;
+}
+
+.ProseMirror .selectedCell:after {
+  z-index: 2;
+  position: absolute;
+  content: "";
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(200, 200, 255, 0.4);
+  pointer-events: none;
+}
+
+.ProseMirror .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: -2px;
+  width: 4px;
+  background-color: #3b82f6;
+  pointer-events: none;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.resize-cursor {
+  cursor: ew-resize;
+  cursor: col-resize;
 }

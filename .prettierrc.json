@@ -1,4 +1,10 @@
 {
     "singleQuote": true,
-    "trailingComma": "all"
+    "trailingComma": "all",
+    "printWidth": 150,
+    "tabWidth": 4,
+    "useTabs": false,
+    "semi": true,
+    "proseWrap": "preserve",
+    "htmlWhitespaceSensitivity": "css"
 }

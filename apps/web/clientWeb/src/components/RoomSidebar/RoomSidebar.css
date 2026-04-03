@@ -1,0 +1,156 @@
+.room-sidebar {
+  width: 320px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  border-left: 1px solid #e5e7eb;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -4px 0 15px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* Voice Visualizer Animation */
+.voice-visualizer {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 14px;
+}
+
+.bar {
+  width: 3px;
+  height: 100%;
+  background: #3b82f6;
+  border-radius: 1px;
+  animation: bounce 1.2s infinite ease-in-out;
+}
+
+.bar.scale-1 { animation-delay: -1s; }
+.bar.scale-2 { animation-delay: -0.8s; }
+
+@keyframes bounce {
+  0%, 100% { height: 4px; }
+  50% { height: 14px; }
+}
+
+.user-list-container {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Scrollbar styling */
+.user-list-container::-webkit-scrollbar {
+  width: 4px;
+}
+.user-list-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.user-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  background-color: #ffffff;
+  border: 1px solid #f1f5f9;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.user-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  border-color: #3b82f644;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-detail {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-icon {
+  color: #f59e0b;
+  font-size: 12px;
+}
+
+.self-tag {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: normal;
+}
+
+.user-status {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.user-actions button {
+  transition: all 0.2s;
+}
+
+.mic-active-btn {
+  background-color: #3b82f6 !important;
+  color: white !important;
+  border: none !important;
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4) !important;
+}
+
+.join-voice-btn {
+  height: 44px;
+  border-radius: 10px;
+  font-weight: 600;
+  background: #3b82f6;
+  border: none;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.mute-all-btn.danger {
+  height: 44px;
+  border-radius: 10px;
+  font-weight: 600;
+  background: #ef4444;
+  border: none;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.sidebar-footer {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #f1f5f9;
+}

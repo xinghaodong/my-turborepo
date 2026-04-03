@@ -22,3 +22,8 @@ export const updateUserRole = (id: string, role: string) => {
 export const toggleUserActive = (id: string) => {
   return request.patch(`/users/${id}/toggle-active`) as any as Promise<User>;
 };
+
+/** 删除用户 */
+export const deleteUser = (id: string) => {
+  return request.delete(`/users/${id}`) as any as Promise<User>;
+};
